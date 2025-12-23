@@ -34,17 +34,17 @@ const commandMap = [
   { machineId: "E3DS-S20", rpiName: "rpi2", gpioCode: 15 },
   { machineId: "E3DS-S21", rpiName: "rpi2", gpioCode: 14 },
 
-  { machineId: "MP-09-MS-07 (172.7.191.81)", rpiName: "rpi3", gpioCode: 23 },
-  { machineId: "MP-12-MS-08 (172.7.191.92)", rpiName: "rpi3", gpioCode: 10 },
-  { machineId: "MP-06-MS-11 (172.7.191.76)", rpiName: "rpi3", gpioCode: 24 },
-  { machineId: "E3DS-S26-build-machine(172.7.191.69)", rpiName: "rpi3", gpioCode: 15 },
-  { machineId: "E3DS-AS1-N", rpiName: "rpi3", gpioCode: 18 },
-  { machineId: "MP-04 (172.7.191.74)", rpiName: "rpi3", gpioCode: 22 },
-  { machineId: "E3DS-S22", rpiName: "rpi3", gpioCode: 2 },
-  { machineId: "E3DS-S23", rpiName: "rpi3", gpioCode: 3 },
-  { machineId: "E3DS-S24", rpiName: "rpi3", gpioCode: 4 },
-  { machineId: "E3DS-S25", rpiName: "rpi3", gpioCode: 14 },
-  { machineId: "E3DS-S27", rpiName: "rpi3", gpioCode: 17 }
+  { machineId: "MP-09-MS-07 (172.7.191.81)", rpiName: "e3dspie3", gpioCode: 23 },
+  { machineId: "MP-12-MS-08 (172.7.191.92)", rpiName: "e3dspie3", gpioCode: 10 },
+  { machineId: "MP-06-MS-11 (172.7.191.76)", rpiName: "e3dspie3", gpioCode: 24 },
+  { machineId: "E3DS-S26-build-machine(172.7.191.69)", rpiName: "e3dspie3", gpioCode: 15 },
+  { machineId: "E3DS-AS1-N", rpiName: "e3dspie3", gpioCode: 18 },
+  { machineId: "MP-04 (172.7.191.74)", rpiName: "e3dspie3", gpioCode: 22 },
+  { machineId: "E3DS-S22", rpiName: "e3dspie3", gpioCode: 2 },
+  { machineId: "E3DS-S23", rpiName: "e3dspie3", gpioCode: 3 },
+  { machineId: "E3DS-S24", rpiName: "e3dspie3", gpioCode: 4 },
+  { machineId: "E3DS-S25", rpiName: "e3dspie3", gpioCode: 14 },
+  { machineId: "E3DS-S27", rpiName: "e3dspie3", gpioCode: 17 }
 ];
 
 // ------------------
@@ -52,7 +52,7 @@ const commandMap = [
 // ------------------
 function findClientByMachineName(machineName) {
 	
-	machineName="MasterServer06"
+	//machineName="MasterServer06"
   return clients.find((c) => c.machineName === machineName) || null;
 }
 
@@ -107,14 +107,21 @@ app.get("/trigger/:machineId", (req, res) => {//  http://connector_ms6.eagle3dst
   // 1) find command config for this machine
   const command = findCommandByMachineId(machineId);
   if (!command) {
-    return res.status(404).send("Machine not in commandMap");
+	  
+	  var fsgsg="Machine not in commandMap: "+machineId
+	  console.log(fsgsg)
+    return res.status(404).send(fsgsg);
+	
+   
   }
 
   // 2) find the connected RPi socket
-  //    (RPi clients must register with machineName = "rpi1"/"rpi2"/"rpi3")
+  //    (RPi clients must register with machineName = "rpi1"/"rpi2"/"e3dspie3")
   const rpiClient = findClientByMachineName(command.rpiName);
   if (!rpiClient) {
-    return res.status(404).send(`RPi not connected: ${command.rpiName}`);
+	  var fsgsg=`RPi not connected: ${command.rpiName}`
+	    console.log(fsgsg)
+    return res.status(404).send(fsgsg);
   }
 
 var fsgs={
