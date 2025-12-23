@@ -51,6 +51,8 @@ const commandMap = [
 // Helpers
 // ------------------
 function findClientByMachineName(machineName) {
+	
+	machineName="MasterServer06"
   return clients.find((c) => c.machineName === machineName) || null;
 }
 
@@ -99,8 +101,8 @@ io.on("connection", (socket) => {
 //   - server will look up which RPi should do it (rpiName) and which gpioCode
 //   - server will emit to that RPi client
 // ------------------
-app.get("/trigger/:machineName", (req, res) => {
-  const machineId = req.params.machineName;
+app.get("/trigger/:machineId", (req, res) => {//  http://connector_ms6.eagle3dstreaming.com:3000/trigger/E3DS-S11
+  const machineId = req.params.machineId;
 
   // 1) find command config for this machine
   const command = findCommandByMachineId(machineId);
@@ -115,12 +117,15 @@ app.get("/trigger/:machineName", (req, res) => {
     return res.status(404).send(`RPi not connected: ${command.rpiName}`);
   }
 
-  // 3) emit to RPi client
-  rpiClient.socket.emit("machineCommand", {
+var fsgs={
     machineId: command.machineId,
     gpioCode: command.gpioCode,
     rpiName: command.rpiName
-  });
+  }
+  
+   console.log( "sending cmd: "+rpiClient.socket.id+ " -> "+JSON.stringify(fsgs));
+  // 3) emit to RPi client
+  rpiClient.socket.emit("machineCommand", fsgs);
 
   res.send(
     `Command sent: machineId=${command.machineId} -> ${command.rpiName} gpio=${command.gpioCode}`
