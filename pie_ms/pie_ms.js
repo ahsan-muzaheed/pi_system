@@ -1,61 +1,83 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = new Server(server);
 
-// Store connected clients
+// ------------------
+// Runtime clients
+// ------------------
 const clients = [];
 
-// Command map as a JSON object keyed by machine name
-const commandMap = {};
+// ------------------
+// Static command map (YOU fill this manually)
+// ------------------
+const commandMap = {
+  // "DESKTOP-ABC123": { valueToPassToPy: 42, piClone: 1 }
+};
 
-// Handle client connections
-io.on('connection', (socket) => {
-  console.log('A client connected.');
+// ------------------
+// Socket handling
+// ------------------
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
 
-  // Listen for the client to send its machine name
-  socket.on('registerMachine', (machineName) => {
-    // Store the machine name and socket in the clients array
+  socket.on("registerMachine", (machineName) => {
+    console.log("Registering machine:", machineName);
+
+    // Remove old entry if reconnecting
+    const existingIndex = clients.findIndex(
+      (c) => c.machineName === machineName
+    );
+    if (existingIndex !== -1) {
+		
+		 console.log("registerMachine() same machine name found. repalcing previous on with new one ", socket.id);
+      clients.splice(existingIndex, 1);
+    }
+
     clients.push({ machineName, socket });
-    console.log(`Registered machine: ${machineName}`);
-    
-    // Initialize or update the command map for this machine
-    if (!commandMap[machineName]) {
-      commandMap[machineName] = {
-        valueToPassToPy: 0,  // default or placeholder
-        connectedToPiClone: 0 // default or placeholder
-      };
+	
+	console.dir(clients.length)
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+    const index = clients.findIndex((c) => c.socket.id === socket.id);
+    if (index !== -1) {
+      clients.splice(index, 1);
     }
 	
-	console.dir(commandMap)
+	console.dir(clients.length)
   });
 });
 
-// REST API endpoint to trigger a command
-app.get('/trigger/:machineName', (req, res) => {
-  const machineName = req.params.machineName;
+// ------------------
+// REST trigger
+// ------------------
+app.get("/trigger/:machineName", (req, res) => {
+  const { machineName } = req.params;
+
   const command = commandMap[machineName];
-
-  if (command) {
-    const client = clients.find(c => c.machineName === machineName);
-
-    if (client) {
-      client.socket.emit('machineCommand', {
-        action: machineName.includes('start') ? 'start' : 'stop',
-        value: command.valueToPassToPy
-      });
-      res.send(`Command sent to ${machineName} with value ${command.valueToPassToPy}`);
-    } else {
-      res.status(404).send('Client not connected');
-    }
-  } else {
-    res.status(404).send('Machine not found in the command map');
+  if (!command) {
+    return res.status(404).send("Machine not in commandMap");
   }
+
+  const client = clients.find((c) => c.machineName === machineName);
+  if (!client) {
+    return res.status(404).send("Machine not connected");
+  }
+
+  client.socket.emit("machineCommand", {
+    value: command.valueToPassToPy,
+    piClone: command.piClone
+  });
+
+  res.send(`Command sent to ${machineName}`);
 });
 
+// ------------------
 server.listen(3000, () => {
-  console.log('Server listening on port 3000');
+  console.log("Server running on port 3000");
 });

@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 const os = require('os');
 
 // Connect to the Socket.IO server
-const socket = io('http://localhost:3000');
+const socket = io('http://connector_ms6.eagle3dstreaming.com:3000');
 
 // Get the machine's hostname
 const machineName = os.hostname();
