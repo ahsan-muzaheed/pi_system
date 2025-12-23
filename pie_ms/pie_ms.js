@@ -7,6 +7,13 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // ------------------
+// EJS setup
+// ------------------
+app.set("view engine", "ejs");
+app.set("views", __dirname + "/views");
+app.use(express.static(__dirname + "/public"));
+
+// ------------------
 // Runtime clients
 // ------------------
 const clients = []; // [{ machineName, socket }]
@@ -51,11 +58,8 @@ const commandMap = [
 // Helpers
 // ------------------
 function findClientByMachineName(machineName) {
-	
-	//machineName="MasterServer06"
   return clients.find((c) => c.machineName === machineName) || null;
 }
-
 function findCommandByMachineId(machineId) {
   return commandMap.find((x) => x.machineId === machineId) || null;
 }
@@ -69,13 +73,9 @@ io.on("connection", (socket) => {
   socket.on("registerMachine", (machineName) => {
     console.log("Registering machine:", machineName);
 
-    // Remove old entry if reconnecting (same machine name)
     const existingIndex = clients.findIndex((c) => c.machineName === machineName);
     if (existingIndex !== -1) {
-      console.log(
-        "registerMachine() same machine name found. replacing previous one with new one",
-        socket.id
-      );
+      console.log("Same machineName found. Replacing old socket:", socket.id);
       clients.splice(existingIndex, 1);
     }
 
@@ -85,161 +85,62 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
-
     const index = clients.findIndex((c) => c.socket.id === socket.id);
-    if (index !== -1) {
-      clients.splice(index, 1);
-    }
-
+    if (index !== -1) clients.splice(index, 1);
     console.log("Connected clients:", clients.length);
   });
 });
 
 // ------------------
 // REST trigger
-//   - machineName in URL is the MACHINE you want to control (machineId)
-//   - server will look up which RPi should do it (rpiName) and which gpioCode
-//   - server will emit to that RPi client
 // ------------------
-app.get("/trigger/:machineId", (req, res) => {//  http://connector_ms6.eagle3dstreaming.com:3000/trigger/E3DS-S11
+app.get("/trigger/:machineId", (req, res) => {
   const machineId = req.params.machineId;
 
-  // 1) find command config for this machine
   const command = findCommandByMachineId(machineId);
   if (!command) {
-	  
-	  var fsgsg="Machine not in commandMap: "+machineId
-	  console.log(fsgsg)
-    return res.status(404).send(fsgsg);
-	
-   
+    const msg = "Machine not in commandMap: " + machineId;
+    console.log(msg);
+    return res.status(404).send(msg);
   }
 
-  // 2) find the connected RPi socket
-  //    (RPi clients must register with machineName = "e3dspie1"/"e3dspie2"/"e3dspie3")
   const rpiClient = findClientByMachineName(command.rpiName);
   if (!rpiClient) {
-	  var fsgsg=`RPi not connected: ${command.rpiName}`
-	    console.log(fsgsg)
-    return res.status(404).send(fsgsg);
+    const msg = `RPi not connected: ${command.rpiName}`;
+    console.log(msg);
+    return res.status(404).send(msg);
   }
 
-var fsgs={
+  const payload = {
     machineId: command.machineId,
     gpioCode: command.gpioCode,
     rpiName: command.rpiName
-  }
-  
-   console.log( "sending cmd: "+rpiClient.socket.id+ " -> "+JSON.stringify(fsgs));
-  // 3) emit to RPi client
-  rpiClient.socket.emit("machineCommand", fsgs);
+  };
 
-  res.send(
-    `Command sent: machineId=${command.machineId} -> ${command.rpiName} gpio=${command.gpioCode}`
-  );
+  console.log("sending cmd:", rpiClient.socket.id, payload);
+  rpiClient.socket.emit("machineCommand", payload);
+
+  res.send(`Command sent: machineId=${payload.machineId} -> ${payload.rpiName} gpio=${payload.gpioCode}`);
 });
 
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 // ------------------
-// Machine Controller Page (dynamic HTML)
+// EJS pages
 // ------------------
 app.get("/machine-controller", (req, res) => {
-  const rows = commandMap
-    .map((m) => {
-      const machineId = escapeHtml(m.machineId);
-      const rpiName = escapeHtml(m.rpiName);
-      const gpioCode = escapeHtml(m.gpioCode);
+  res.render("machine-controller", { commandMap });
+});
 
-      // encodeURIComponent is important because your machineId contains spaces/() sometimes
-      const encodedMachineId = encodeURIComponent(m.machineId);
-
-      return `
-        <tr>
-          <td class="mono">${machineId}</td>
-          <td>${rpiName}</td>
-          <td class="mono">${gpioCode}</td>
-          <td>
-            <button onclick="triggerMachine('${encodedMachineId}')">Trigger</button>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
-
-  const html = `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Machine Controller</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { margin-bottom: 10px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 10px; }
-    th { background: #f5f5f5; text-align: left; }
-    button { padding: 8px 12px; cursor: pointer; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    #status { margin-top: 12px; padding: 10px; border: 1px solid #ddd; background: #fafafa; }
-  </style>
-</head>
-<body>
-  <h1>Machine Controller</h1>
-  <p>Click <b>Trigger</b> to call <span class="mono">/trigger/:machineId</span>.</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Machine ID</th>
-        <th>RPi</th>
-        <th>GPIO</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${rows}
-    </tbody>
-  </table>
-
-  <div id="status">Ready.</div>
-
-  <script>
-    async function triggerMachine(encodedMachineId) {
-      const status = document.getElementById("status");
-      status.textContent = "Sending...";
-
-      try {
-        const resp = await fetch("/trigger/" + encodedMachineId, { method: "GET" });
-        const text = await resp.text();
-
-        if (!resp.ok) {
-          status.textContent = "ERROR: " + text;
-          return;
-        }
-
-        status.textContent = "OK: " + text;
-      } catch (err) {
-        status.textContent = "ERROR: " + (err && err.message ? err.message : String(err));
-      }
-    }
-  </script>
-</body>
-</html>`;
-
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send(html);
+// Optional debug page
+app.get("/clients", (req, res) => {
+  const safeClients = clients.map((c) => ({
+    machineName: c.machineName,
+    socketId: c.socket.id
+  }));
+  res.render("clients", { clients: safeClients });
 });
 
 // ------------------
 server.listen(3000, () => {
   console.log("Server running on port 3000");
+  console.log("Open: http://localhost:3000/machine-controller");
 });

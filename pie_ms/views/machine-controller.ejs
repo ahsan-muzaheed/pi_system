@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Machine Controller</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 10px; }
+    th { background: #f5f5f5; text-align: left; }
+    button { padding: 8px 12px; cursor: pointer; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    #status { margin-top: 12px; padding: 10px; border: 1px solid #ddd; background: #fafafa; }
+  </style>
+</head>
+<body>
+
+  <h1>Machine Controller</h1>
+  <p>Click <b>Trigger</b> to call <span class="mono">/trigger/:machineId</span>.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Machine ID</th>
+        <th>RPi</th>
+        <th>GPIO</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% commandMap.forEach(function(m){ %>
+        <tr>
+          <td class="mono"><%= m.machineId %></td>
+          <td class="mono"><%= m.rpiName %></td>
+          <td class="mono"><%= m.gpioCode %></td>
+          <td>
+            <button
+              class="trigger-btn"
+              data-machine-id="<%= encodeURIComponent(m.machineId) %>"
+            >
+              Trigger
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <div id="status">Ready.</div>
+
+  <!-- External JS -->
+  <script src="/js/machine-controller.js"></script>
+</body>
+</html>
