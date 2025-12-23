@@ -1,0 +1,11 @@
+{
+  "name": "pie-agent",
+  "version": "1.0.0",
+  "main": "pie_agent.js",
+  "scripts": {
+    "start": "node pie_agent.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.5"
+  }
+}

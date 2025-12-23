@@ -1,0 +1,4 @@
+/pie_agent/node_modules
+/pie_ms/node_modules
+pie_ms/package-lock.json
+pie_agent/package-lock.json
