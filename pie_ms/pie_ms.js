@@ -38,6 +38,9 @@ const commandMap = [
 
   { machineId: "E3DS-S15", rpiName: "e3dspie2", gpioCode: 2 },
   { machineId: "E3DS-S16", rpiName: "e3dspie2", gpioCode: 3 },
+  { machineId: "E3DS-S17", rpiName: "e3dspie2", gpioCode: 4 },
+  //{ machineId: "E3DS-S18", rpiName: "e3dspie2", gpioCode:  },
+  //{ machineId: "E3DS-S19", rpiName: "e3dspie2", gpioCode:  },
   { machineId: "E3DS-S20", rpiName: "e3dspie2", gpioCode: 15 },
   { machineId: "E3DS-S21", rpiName: "e3dspie2", gpioCode: 14 },
 
