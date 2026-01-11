@@ -21,7 +21,7 @@ const clients = []; // [{ machineName, socket }]
 // ------------------
 // Static command map (ARRAY)
 // ------------------
-const commandMap = [
+var commandMap = [
   { machineId: "E3DS-S1", rpiName: "e3dspie1", gpioCode: 2 },
   { machineId: "E3DS-S2", rpiName: "e3dspie1", gpioCode: 3 },
   { machineId: "E3DS-S4", rpiName: "e3dspie1", gpioCode: 14 },
@@ -56,6 +56,49 @@ const commandMap = [
   { machineId: "E3DS-S25", rpiName: "e3dspie3", gpioCode: 14 },
   { machineId: "E3DS-S27", rpiName: "e3dspie3", gpioCode: 17 }
 ];
+
+
+ commandMap = [
+  { machineId: "E3DS-S1", rpiName: "e3dspie1", gpioCode: 2 },
+  { machineId: "E3DS-S2", rpiName: "e3dspie1", gpioCode: 3 },
+  { machineId: "E3DS-S4", rpiName: "e3dspie1", gpioCode: 14 },
+  { machineId: "E3DS-S5", rpiName: "e3dspie1", gpioCode: 15 },
+  { machineId: "E3DS-S6", rpiName: "e3dspie1", gpioCode: 17 },
+  { machineId: "E3DS-S7", rpiName: "e3dspie1", gpioCode: 18 },
+  { machineId: "E3DS-S8", rpiName: "e3dspie1", gpioCode: 27 },
+  { machineId: "E3DS-S9", rpiName: "e3dspie1", gpioCode: 22 },
+  { machineId: "E3DS-S10", rpiName: "e3dspie1", gpioCode: 23 },
+  { machineId: "E3DS-S11", rpiName: "e3dspie1", gpioCode: 24 },
+  { machineId: "E3DS-S12", rpiName: "e3dspie1", gpioCode: 10 },
+  { machineId: "E3DS-S13", rpiName: "e3dspie1", gpioCode: 4 },
+  { machineId: "E3DS-S14", rpiName: "e3dspie1", gpioCode: 25 },
+
+  { machineId: "E3DS-S15", rpiName: "e3dspie2", gpioCode: 2 },
+  { machineId: "E3DS-S16", rpiName: "e3dspie2", gpioCode: 3 },
+  { machineId: "E3DS-S17", rpiName: "e3dspie2", gpioCode: 4 },
+  { machineId: "E3DS-S20", rpiName: "e3dspie2", gpioCode: 15 },
+  { machineId: "E3DS-S21", rpiName: "e3dspie2", gpioCode: 14 },
+
+  { machineId: "MP-09", rpiName: "e3dspie3", gpioCode: 23 },
+  { machineId: "MP-12", rpiName: "e3dspie3", gpioCode: 10 },
+  { machineId: "MP-06", rpiName: "e3dspie3", gpioCode: 24 },
+  { machineId: "E3DS-S26", rpiName: "e3dspie3", gpioCode: 15 },
+  { machineId: "E3DS-AS1-N", rpiName: "e3dspie3", gpioCode: 18 },
+  { machineId: "MP-04", rpiName: "e3dspie3", gpioCode: 22 },
+  { machineId: "E3DS-S22", rpiName: "e3dspie3", gpioCode: 2 },
+  { machineId: "E3DS-S23", rpiName: "e3dspie3", gpioCode: 3 },
+  { machineId: "E3DS-S24", rpiName: "e3dspie3", gpioCode: 4 },
+  { machineId: "E3DS-S25", rpiName: "e3dspie3", gpioCode: 14 },
+  { machineId: "E3DS-S27", rpiName: "e3dspie3", gpioCode: 17 },
+
+  // ✅ NEW: e3dspie4 mappings
+  { machineId: "MS-01", rpiName: "e3dspie4", gpioCode: 2 },
+  { machineId: "MS-02", rpiName: "e3dspie4", gpioCode: 3 },
+  { machineId: "MS-03", rpiName: "e3dspie4", gpioCode: 4 },
+  { machineId: "MS-18", rpiName: "e3dspie4", gpioCode: 15 },
+  { machineId: "MS-19", rpiName: "e3dspie4", gpioCode: 14 }
+];
+
 
 // ------------------
 // Helpers
